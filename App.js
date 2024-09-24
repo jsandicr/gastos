@@ -12,6 +12,8 @@ import HistoryScreen from './app/screens/HistoryScreen';
 import CustomHeader from './components/CustomHeader';
 import AddGroupScreen from './app/screens/AddGroupScreen';
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
+import axios from 'axios'
+import RegisterScreen from './app/screens/RegisterScreen';
 
 const linking = {
   prefixes: ['gastos://'],
@@ -50,6 +52,8 @@ export const HEADER_TITLES = {
 
 const Stack = createNativeStackNavigator();
 
+axios.defaults.timeout = 5000; // 5 segundos
+
 export default function App() {
   return (
     <AuthProvider>
@@ -65,6 +69,7 @@ function Layout(){
   return(
     <NavigationContainer linking={linking}>
         <Stack.Navigator
+          initialRouteName={authState?.authenticated ? ROUTES.HOME : ROUTES.LOGIN}
           screenOptions={({ route }) => ({
             headerShown: true,
             header: () => (
@@ -112,11 +117,18 @@ function Layout(){
                 component={HistoryScreen}
               />
             </>:
-              <Stack.Screen
-                name="Login"
-                component={LoginScreen}
-                options={{ headerShown: false }}
-              />
+              <>
+                <Stack.Screen
+                  name="Login"
+                  component={LoginScreen}
+                  options={{ headerShown: false }}
+                />
+                <Stack.Screen
+                  name="Register"
+                  component={RegisterScreen}
+                  options={{ headerShown: false }}
+                />
+              </>
           }
         </Stack.Navigator>
       </NavigationContainer>

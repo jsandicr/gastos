@@ -1,20 +1,15 @@
 import { View, Text, StyleSheet, TextInput, Image, TouchableOpacity } from 'react-native'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
-import { useNavigation } from '@react-navigation/native';
 
-export default function LoginScreen() {
-  const navigation = useNavigation();
+export default function RegisterScreen() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [name, setName] = useState('')
   const { onLogin, onRegister } = useAuth('')
 
   const login = async () => {
-    if(!email || !password){
-      alert("Debe ingresar el email y contraseña")
-      return
-    }
     const result = await onLogin(email, password)
     if (result && result.error) {
       alert(result.msg)
@@ -22,21 +17,26 @@ export default function LoginScreen() {
   }
 
   const register = async () => {
-    navigation.navigate('Register');
+    if(!email || !password){
+      alert("Debe ingresar el email y contraseña")
+      return
+    }
+    const result = await onRegister(email, name, password)
+    if (result && result.error) {
+      alert(result.msg)
+    } else {
+      login()
+    }
   }
 
   return (
     <View style={styles.container}>
       <Image source={require('../../assets/icon.png')} style={styles.image} />
       <View style={styles.form}>
-        <Text style={styles.title}>Login</Text>
+        <Text style={styles.title}>Register</Text>
         <TextInput style={styles.input} placeholder="Email" onChangeText={(text) => setEmail(text)} value={email}></TextInput>
+        <TextInput style={styles.input} placeholder="Name" onChangeText={(text) => setName(text)} value={name}></TextInput>
         <TextInput style={styles.input} placeholder="Password" secureTextEntry={true} onChangeText={(text) => setPassword(text)} value={password}></TextInput>
-        <TouchableOpacity onPress={() => login()}>
-          <View style={styles.button}>
-            <Text style={styles.addText}>Sign in</Text>
-          </View>
-        </TouchableOpacity>
         <TouchableOpacity onPress={() => register()}>
           <View style={styles.button}>
             <Text style={styles.addText}>Create Account</Text>

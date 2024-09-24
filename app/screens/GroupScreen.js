@@ -9,9 +9,12 @@ import * as Linking from 'expo-linking';
 import * as Clipboard from 'expo-clipboard';
 import { ActionSheetProvider, useActionSheet } from '@expo/react-native-action-sheet';
 import { Ionicons } from '@expo/vector-icons';
+import { onLeaveGroup } from '../services/GroupsServices';
 
 export default function GroupScreen({ route, navigation }) {
-  const { idGroup } = route.params;
+  const { group } = route.params;
+  const { id } = group;
+  
   const [expenses, setExpenses] = useState([]);
   const [email, setEmail] = useState('');
 
@@ -28,32 +31,30 @@ export default function GroupScreen({ route, navigation }) {
   useFocusEffect(
     useCallback(() => {
       const fetchExpenses = async () => {
-        const result = await loadExpenses(idGroup);
+        const result = await loadExpenses(id);
         if (result && !result.error) {
           setExpenses(result);
-        } else {
-          console.error(result.msg);
         }
       };
       fetchExpenses();
-    }, [idGroup])
+    }, [id])
   );
 
   const handleAddExpenses = () => {
-    navigation.navigate('AddExpenses', { idGroup });
+    navigation.navigate('AddExpenses', { group });
   };
 
   const openExpenses = (expenses) => {
-    navigation.navigate('ViewExpenses', { expenses, idGroup });
+    navigation.navigate('ViewExpenses', { expenses, group, email });
   };
 
   const history = () => {
     const filteredExpenses = expenses.filter((item) => item.status === 'complete');
-    navigation.navigate('HistoryExpenses', { expenses: filteredExpenses, idGroup });
+    navigation.navigate('HistoryExpenses', { expenses: filteredExpenses, group });
   };
 
   const handleShareLink = () => {
-    const groupCode = idGroup;
+    const groupCode = id;
     const options = ['Copiar código', 'Enviar por WhatsApp', 'Cancelar'];
     const cancelButtonIndex = 2;
   
@@ -76,6 +77,36 @@ export default function GroupScreen({ route, navigation }) {
     );
   };  
 
+  const handleLeaveGroup = () => {
+    Alert.alert(
+      'Confirmar Salirse',
+      '¿Estás seguro de que deseas salirte del grupo?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Salirse',
+          onPress: () => {
+            leave()
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
+  const leave = async () => {
+    const result = await onLeaveGroup(id);
+    
+    if (result.error) {
+      alert(result.error);
+    }else{
+      navigation.replace('Home');
+    }
+  }
+
   return (
     <ActionSheetProvider>
       <View style={styles.container}>
@@ -83,20 +114,29 @@ export default function GroupScreen({ route, navigation }) {
           <View style={styles.tasksWrapper}>
             <View style={styles.linksContainer}>
               <Text style={styles.sectionTitle}>Expenses</Text>
-              <TouchableOpacity onPress={handleShareLink}>
-                <View style={styles.button}>
-                  <Text style={styles.addText}>
-                    <Ionicons name="share-outline" size={20}></Ionicons>
-                  </Text>
-                </View>
-              </TouchableOpacity>
+              <View style={styles.btnList}>
+                <TouchableOpacity onPress={handleLeaveGroup}>
+                  <View style={[styles.button, styles.deleteBtn]}>
+                    <Text style={styles.addText}>
+                      <Ionicons name="trash-outline" size={20}></Ionicons>
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleShareLink}>
+                  <View style={styles.button}>
+                    <Text style={styles.addText}>
+                      <Ionicons name="share-outline" size={20}></Ionicons>
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
             </View>
             <View style={styles.items}>
               {expenses
                 .filter((item) => item.status === 'incomplete')
                 .map((item, index) => (
                   <TouchableOpacity key={index} onPress={() => openExpenses(item)}>
-                    <Expenses item={item} email={email} idGroup={idGroup} navigation={navigation} />
+                    <Expenses item={item} group={group} email={email} idGroup={id} navigation={navigation} />
                   </TouchableOpacity>
                 ))}
               <TouchableOpacity onPress={handleAddExpenses}>
@@ -158,5 +198,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center'
+  },
+  deleteBtn: {
+    backgroundColor: 'red'
+  },
+  btnList: {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 10
   }
 });

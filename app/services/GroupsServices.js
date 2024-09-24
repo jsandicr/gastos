@@ -8,37 +8,54 @@ export const loadGroups = async () => {
         return []
     }
     try {
-        const response = await fetch(`${API_URL}/groups/${email}`, { //Buscar por id de usuario
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': axios.defaults.headers.common['Authorization']
-            }
-        });
-        let data = await response.json();
-        return data;
+        const response = await axios.get(`${API_URL}/groups/${email}`);
+        return response.data;
     } catch (e) {
-        return { error: true, msg: e.message };
+        if (e.response && e.response.data) {
+            return { error: true, msg: e.response.data.msg };
+        } else {
+            return { error: true, msg: 'Error de conexión o servidor no disponible' };
+        }
     }
 }
 
 export const onJoinGroup = async (code) => {
     try {
         const email = await SecureStore.getItemAsync('email');
-        const response = await fetch(`${API_URL}/groups/join/${code}/${email}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': axios.defaults.headers.common['Authorization']
-            }
-        });
-        let data = await response.json();
-        if(data.message != null){
-            return {error: data.message}
+        if(!email){    
+            return {error: true, msg: "Ocurrio un problema"}
         }
-        return data;
+        const response = await axios.get(`${API_URL}/groups/join/${code}/${email}`);
+        if(response.message != null){
+            return {error: true, msg: data.message}
+        }
+        return response.data;
     } catch (e) {
-        return { error: true, msg: e.message };
+        if (e.response && e.response.data) {
+            return { error: true, msg: e.response.data.msg };
+        } else {
+            return { error: true, msg: 'Error de conexión o servidor no disponible' };
+        }
+    }
+}
+
+export const onLeaveGroup = async (code) => {
+    try {
+        const email = await SecureStore.getItemAsync('email');
+        if(!email){
+            return {error: true, msg: "Ocurrio un problema"}
+        }
+        const response = await axios.post(`${API_URL}/groups/leave/${code}/${email}`);
+        if(response.message != null){
+            return {error: true, msg: data.message}
+        }
+        return response.data;
+    } catch (e) {
+        if (e.response && e.response.data) {
+            return { error: true, msg: e.response.data.msg };
+        } else {
+            return { error: true, msg: 'Error de conexión o servidor no disponible' };
+        }
     }
 }
 
@@ -49,18 +66,13 @@ export const onCreateGroup = async (description) => {
             email,
             description
         };
-        
-        const response = await fetch(`${API_URL}/groups/add`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': axios.defaults.headers.common['Authorization']
-            },
-            body: JSON.stringify(requestBody)
-        });
-        let data = await response.json();
-        return data
+        const response = await axios.post(`${API_URL}/groups/add`, requestBody);
+        return response.data
     } catch (e) {
-        return { error: true, msg: e.message };
+        if (e.response && e.response.data) {
+            return { error: true, msg: e.response.data.msg };
+        } else {
+            return { error: true, msg: 'Error de conexión o servidor no disponible' };
+        }
     }
 }

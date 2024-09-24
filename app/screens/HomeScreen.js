@@ -17,12 +17,8 @@ export default function HomeScreen() {
             const result = await loadGroups();
             if (result && !result.error) {
                 setGroups(result);
-            } else {
-                console.error(result.msg);
-            }
-        } catch (error) {
-            console.error('Error al cargar grupos:', error);
-        }
+            } else {}
+        } catch (error) {}
     };
 
     useEffect(() => {
@@ -36,7 +32,6 @@ export default function HomeScreen() {
                   fetchEmail()
               }
           } catch (error) {
-              console.error('Error al recuperar el email:', error);
           } finally {
               setLoading(false); // Termina el estado de carga
           }
@@ -53,12 +48,8 @@ export default function HomeScreen() {
               const result = await loadGroups(email);
               if (result && !result.error) {
                   setGroups(result);
-              } else {
-                  console.error(result.msg);
               }
-          } catch (error) {
-              console.error('Error al cargar grupos:', error);
-          }
+          } catch (error) {}
       };
 
       if (!loading) {
@@ -72,8 +63,8 @@ export default function HomeScreen() {
         }, [])
     );
 
-    const openGroup = (id) => {
-        navigation.navigate('Group', { idGroup: id });
+    const openGroup = (group) => {
+        navigation.navigate('Group', { group });
     };
 
     const joinGroup = () => {
@@ -91,10 +82,13 @@ export default function HomeScreen() {
                     <Text style={styles.sectionTitle}>Groups</Text>
                     <View style={styles.items}>
                         {groups.map((item, index) => (
-                            <TouchableOpacity key={index} onPress={() => openGroup(item.id)}>
+                            <TouchableOpacity key={index} onPress={() => openGroup(item)}>
                                 <Group text={item.description} />
                             </TouchableOpacity>
                         ))}
+                        {
+                            groups.length == 0 ? <Text style={styles.noGroups}>No hay grupos...</Text> : null
+                        }
                         <TouchableOpacity onPress={() => newGroup()}>
                           <AddElement text="Crear grupo" /> 
                         </TouchableOpacity>
@@ -157,4 +151,8 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     addText: {},
+    noGroups: {
+        fontSize: 15,
+        marginBottom: 25
+    }
 });

@@ -1,21 +1,47 @@
 import React from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { onCloseExpenses } from '../services/ExpensesServices';
 
 export default function ViewExpensesScreen({ route, navigation }) {
-  const { expenses, idGroup } = route.params;
+  const { expenses, group, email } = route.params;
+  const { id: idGroup } = group
+  const { id, createdBy } = expenses
 
   const edit = async () => {
-    navigation.navigate('AddExpenses', {expenseData: expenses, idGroup: idGroup});
+    navigation.navigate('AddExpenses', {expenseData: expenses, group});
   }
 
+  const handleClose = () => {
+    if(createdBy != email){
+      alert("Solo el creador puede cerrar el gasto")
+      return
+    }
+    Alert.alert(
+      'Confirmar Cierre',
+      '¿Estás seguro de que deseas cerrar este gasto?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Cerrar Gasto',
+          onPress: () => {
+            close()
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const close = async () => {
-    result = await onCloseExpenses(idGroup, expenses.id)
+    const result = await onCloseExpenses(idGroup, id);
     
     if (result.error) {
       alert(result.error);
-    } else {
-      navigation.navigate('Group', { idGroup: idGroup });
+    }else{
+      navigation.replace('Group', { group });
     }
   }
 
@@ -35,20 +61,21 @@ export default function ViewExpensesScreen({ route, navigation }) {
               <View key={index} style={styles.memberWrapper}>
                 <Text style={styles.textWrapperTitle}>{member.name}</Text>
                 <Text style={styles.textWrapper}>Percentage: {member.percentage}</Text>
+                <Text style={styles.textWrapper}>Total to pay: {member.totalToPay}</Text>
               </View>
             ))}
           </View>
         </View>
         <View>
           {
-            expenses.status === 'incomplete' ?
+            createdBy == email && expenses.status === 'incomplete' ?
             <>
               <TouchableOpacity onPress={() => edit()}>
                 <View style={[styles.button, styles.edit]}>
                   <Text style={[styles.addText, styles.addTextEdit]}>Edit</Text>
                 </View>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => close()}>
+              <TouchableOpacity onPress={() => handleClose()}>
                 <View style={[styles.button, styles.close]}>
                   <Text style={[styles.addText, styles.addTextClose]}>Close Expense</Text>
                 </View>

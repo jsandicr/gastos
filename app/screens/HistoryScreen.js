@@ -4,11 +4,12 @@ import Expenses from '../../components/Expenses';
 import * as SecureStore from 'expo-secure-store';
 
 export default function HistoryScreen({ route, navigation }) {
-    const { expenses, idGroup } = route.params;
+    const { expenses, group } = route.params;
+    const { idGroup } = group;
     const [email, setEmail] = useState('');
 
     const openExpenses = (expenses) => {
-      navigation.navigate('ViewExpenses', {expenses, idGroup: idGroup});
+      navigation.navigate('ViewExpenses', {expenses, group});
     }
 
     useEffect(() => {

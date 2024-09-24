@@ -12,11 +12,8 @@ export default function JoinGroupScreen() {
     const joinGroup = async () => {
       const result = await onJoinGroup(code)
       if (result && result.error) {
-        alert(result.error)
+        alert(result.msg)
         return
-      }
-      if(result.length==0){
-        alert("El grupo no existe")
       }else{
         navigation.navigate('Home');
       }

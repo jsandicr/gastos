@@ -5,8 +5,8 @@ import { onCloseExpenses, onDeleteExpenses } from '../app/services/ExpensesServi
 
 const Expenses = (props) => {
 
-  const { description, status, createdBy, id } = props.item
-  const { email, idGroup, navigation } = props
+  const { group, item, email, idGroup, navigation } = props
+  const { description, status, createdBy, id } = item
   
   const handleDelete = () => {
 
@@ -34,7 +34,7 @@ const Expenses = (props) => {
     if (result.error) {
       alert(result.error);
     }else{
-      navigation.replace('Group', { idGroup: idGroup });
+      navigation.replace('Group', { group });
     }
   }
 
@@ -68,7 +68,7 @@ const Expenses = (props) => {
     if (result.error) {
       alert(result.error);
     }else{
-      navigation.replace('Group', { idGroup: idGroup });
+      navigation.replace('Group', { group });
     }
   }
 
